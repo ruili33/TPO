@@ -29,10 +29,12 @@ pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --n
 pip install -r requirements_longva.txt
 ```
 
-
-
 For LLaVA-Video-TPO:
 ```
+conda create -n TPOllava python=3.10 -y
+conda activate TPOllava
+pip install --upgrade pip  # Enable PEP 660 support.
+pip install -e "LLaVA/.[train]"
 ```
 
 ### Inference
@@ -48,6 +50,9 @@ For evaluation, we utilize [lmms-eval](https://github.com/EvolvingLMMs-Lab/lmms-
 For LongVA-TPO, please refer to `longva/eval.sh` for the evaluation script.
 
 For LLaVA-Video-TPO,
+
+## Datasets
+The datasets used to .
 
 ## Training
 
