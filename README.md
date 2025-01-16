@@ -36,16 +36,31 @@ For LLaVA-Video-TPO:
 ```
 
 ### Inference
+
 For LongVA-TPO, please following the inference demo in `longva/inference_longva.py`.
 
 For LLaVA-Video-TPO,
 
 ### Evaluation
+
 For evaluation, we utilize [lmms-eval](https://github.com/EvolvingLMMs-Lab/lmms-eval) to facilitate a consistent evaluation as previous works. Please refer to their instructions for evaluation setup.
 
 For LongVA-TPO, please refer to `longva/eval.sh` for the evaluation script.
 
 For LLaVA-Video-TPO,
 
+## Training
+
+The training code is coming soon!
+
+## Citation
+
+If you find this repository useful in your research or work, please consider citing our paper:
+```
+
+```
+
+
 ## Acknowledgements
+
 This work is based on the original [LongVA](https://github.com/EvolvingLMMs-Lab/LongVA) and [LLaVA-Video](https://github.com/LLaVA-VL/LLaVA-NeXT) repository. We extend our gratitude to the maintainers and contributors of these repositories for their incredible work, which greatly facilitated the development of our project.
