@@ -18,7 +18,7 @@ conda create -n TPOLongVA python=3.10
 pip install torch==2.1.2 torchvision --index-url https://download.pytorch.org/whl/cu118
 pip install -e "longva/.[train]"
 pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
-pip install -r requirements.txt
+pip install -r requirements_longva.txt
 ```
 
 For evaluation on LLaVA-Video:
