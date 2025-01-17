@@ -1,6 +1,6 @@
 # Temporal Preference Optimization (TPO) for Long-form Video Understanding
 
-<a href='https://arxiv.org/abs/2410.17434'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://vision-cair.github.io/LongVU'><img src='https://img.shields.io/badge/project-LongVU-blue'></a> <a href='https://huggingface.co/spaces/Vision-CAIR/LongVU'><img src='https://img.shields.io/badge/demo-space-blue'></a> <a href='https://huggingface.co/collections/Vision-CAIR/longvu-67181d2debabfc1eb050c21d'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
+<a href='https://arxiv.org/abs/2410.17434'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://vision-cair.github.io/LongVU'><img src='https://img.shields.io/badge/project-LongVU-blue'></a> <a href='https://huggingface.co/spaces/Vision-CAIR/LongVU'><img src='https://img.shields.io/badge/demo-space-blue'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
 
 
 <img src="asset/cvpr_figure_TPO.png"></img>
@@ -9,8 +9,16 @@ Our work propose Temporal Preference Optimization (TPO), which serves as compreh
 
 ## :rocket: Quick Start
 
-### Linux
-For evaluation on LongVA:
+### Model Weights
+
+| Model | Huggingface Link  |
+:--------------------------:| :--------------------------:|
+| LongVA-7B-TPO | [Download](https://huggingface.co/ruili0/LongVA-7B-TPO) |  
+| LLaVA-Video-7B-TPO | [Download](https://huggingface.co/ruili0/LLaVA-Video-7B-TPO) |
+
+
+### Install (Linux)
+For  LongVA-TPO:
 ```
 git clone https://github.com/ruili33/TPO
 cd TPO
@@ -21,4 +29,43 @@ pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --n
 pip install -r requirements_longva.txt
 ```
 
-For evaluation on LLaVA-Video:
+For LLaVA-Video-TPO:
+```
+conda create -n TPOllava python=3.10 -y
+conda activate TPOllava
+pip install --upgrade pip  # Enable PEP 660 support.
+pip install -e "LLaVA/.[train]"
+```
+
+### Inference
+
+For LongVA-TPO, please following the inference demo in `longva/inference_longva.py`.
+
+For LLaVA-Video-TPO,
+
+### Evaluation
+
+For evaluation, we utilize [lmms-eval](https://github.com/EvolvingLMMs-Lab/lmms-eval) to facilitate a consistent evaluation as previous works. Please refer to their instructions for evaluation setup.
+
+For LongVA-TPO, please refer to `longva/eval.sh` for the evaluation script.
+
+For LLaVA-Video-TPO,
+
+## Datasets
+The datasets used to .
+
+## Training
+
+The training code is coming soon!
+
+## Citation
+
+If you find this repository useful in your research or work, please consider citing our paper:
+```
+
+```
+
+
+## Acknowledgements
+
+This work is based on the original [LongVA](https://github.com/EvolvingLMMs-Lab/LongVA) and [LLaVA-Video](https://github.com/LLaVA-VL/LLaVA-NeXT) repository. We extend our gratitude to the maintainers and contributors of these repositories for their incredible work, which greatly facilitated the development of our project.
