@@ -41,7 +41,7 @@ pip install -e "LLaVA/.[train]"
 
 For LongVA-TPO, please following the inference demo in `longva/inference_longva.py`.
 
-For LLaVA-Video-TPO,
+For LLaVA-Video-TPO, please following the inference demo in `LLaVA/inference_llava.py`.
 
 ### Evaluation
 
