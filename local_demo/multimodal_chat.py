@@ -19,7 +19,7 @@ from constants import (
 dropdown, js = create_theme_dropdown()
 
 from longva_backend import LongVA
-longva = LongVA(pretrained="lmms-lab/LongVA-7B-DPO", model_name="llava_qwen", device_map="auto", device="cuda")
+longva = LongVA(pretrained="ruili0/LongVA-7B-TPO", model_name="llava_qwen", device_map="auto", device="cuda")
 
 
 def generate_file_hash(file_path):
