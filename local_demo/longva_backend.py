@@ -58,7 +58,7 @@ class LongVA:
 
     def __init__(
         self,
-        pretrained: str = "lmms-lab/LongVA-7B-DPO",
+        pretrained: str = "ruili0/LongVA-7B-TPO",
         truncation: Optional[bool] = True,
         device: Optional[str] = "cuda:0",
         batch_size: Optional[Union[int, str]] = 1,
@@ -567,7 +567,7 @@ if __name__ == "__main__":
     parser.add_argument("--question", type=str, required=True)
     parser.add_argument("--device", type=str, default="cuda:0")
     args = parser.parse_args()
-    model = LongVA(pretrained="lmms-lab/LongVA-7B-DPO", model_name="llava_qwen", device_map=args.device)
+    model = LongVA(pretrained="lruili0/LongVA-7B-TPO", model_name="llava_qwen", device_map=args.device)
     if args.image_path:
         image_demo(model, args)
     if args.video_path:

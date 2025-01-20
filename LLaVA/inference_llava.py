@@ -30,7 +30,7 @@ def load_video(self, video_path, max_frames_num,fps=1,force_sample=False):
     spare_frames = vr.get_batch(frame_idx).asnumpy()
     # import pdb;pdb.set_trace()
     return spare_frames,frame_time,video_time
-pretrained = "ruili0/LLaVA-Video-7B-TPO"
+pretrained = "ruili0/LLaVA-Video-7B-Qwen2-TPO"
 model_name = "llava_qwen"
 device = "cuda"
 device_map = "auto"
