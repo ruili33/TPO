@@ -1,6 +1,6 @@
 # Temporal Preference Optimization (TPO) for Long-form Video Understanding
 
-<a href='https://arxiv.org/abs/2410.17434'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://ruili33.github.io/tpo_website.github.io/'><img src='https://img.shields.io/badge/project-TPO-blue'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/huggingface-datasets-green'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
+<a href='https://arxiv.org/abs/2410.17434'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://ruili33.github.io/tpo_website/'><img src='https://img.shields.io/badge/project-TPO-blue'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/huggingface-datasets-green'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
 
 
 <img src="asset/cvpr_figure_TPO.png"></img>
