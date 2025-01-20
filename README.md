@@ -33,7 +33,7 @@ For LLaVA-Video-TPO:
 ```
 conda create -n TPOllava python=3.10 -y
 conda activate TPOllava
-pip install --upgrade pip  # Enable PEP 660 support.
+pip install --upgrade pip 
 pip install -e "LLaVA/.[train]"
 ```
 
