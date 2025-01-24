@@ -80,7 +80,7 @@ html_header = """
  
   <div>
     <h2><a href="https://ruili33.github.io/tpo_website/">Temporal Preference Optimization for Long-Form Video Understanding</a></h2>
-    <h5><a href="https://github.com/ruili33/TPO">Github</a> | <a href="https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10">Huggingface</a> | <a href="https://ruili33.github.io/tpo_website/">Blog</a> | <a href="https://arxiv.org/">ArXiv Paper</a></h5>
+    <h5><a href="https://github.com/ruili33/TPO">Github</a> | <a href="https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10">Huggingface</a> | <a href="https://ruili33.github.io/tpo_website/">Blog</a> | <a href="https://arxiv.org/abs/2501.13919v1">ArXiv Paper</a></h5>
     <h5>Web demo for TPO models from the paper Temporal Preference Optimization for Long-Form Video Understanding.</h5>
   </div>
 </div>
@@ -109,7 +109,14 @@ The service is a research preview intended for non-commercial use only, subject 
 bibtext = """
 ## Citation
 ```
-
+@misc{li2025temporalpreferenceoptimizationlongform,
+      title={Temporal Preference Optimization for Long-Form Video Understanding}, 
+      author={Rui Li and Xiaohan Wang and Yuhui Zhang and Zeyu Wang and Serena Yeung-Levy},
+      year={2025},
+      eprint={2501.13919},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2501.13919}, 
 }
 ```
 """
