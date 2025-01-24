@@ -263,13 +263,13 @@ if __name__ == "__main__":
         avatar_images=(
             (
                 os.path.join(
-                    os.path.dirname(__file__), f"{PARENT_FOLDER}/assets/user_logo.png"
+                    os.path.dirname(__file__), f"{PARENT_FOLDER}/assets/user_logo.jpg"
                 )
             ),
             (
                 os.path.join(
                     os.path.dirname(__file__),
-                    f"{PARENT_FOLDER}/assets/assistant_logo.png",
+                    f"{PARENT_FOLDER}/assets/assistant_logo.jpg",
                 )
             ),
         ),

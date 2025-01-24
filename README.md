@@ -36,7 +36,6 @@ conda create -n TPOllava python=3.10 -y
 conda activate TPOllava
 pip install --upgrade pip 
 pip install -e "LLaVA/.[train]"
-pip install loguru
 pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
 ```
 

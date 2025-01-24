@@ -1,7 +1,7 @@
 
 [standalone]
 shortuuid
-httpx==0.24.0
+httpx==0.28.1
 einops
 ftfy
 
@@ -28,10 +28,10 @@ scikit-learn==1.2.2
 sentencepiece~=0.1.99
 einops==0.6.1
 einops-exts==0.0.4
-gradio_client==0.2.9
+gradio_client==1.6.0
 urllib3<=2.0.0
 datasets==2.16.1
-pydantic==1.10.8
+pydantic==2.10.6
 timm
 hf_transfer
 opencv-python
@@ -39,3 +39,5 @@ av
 decord
 tyro
 scipy
+gradio==5.13.1
+loguru
