@@ -68,6 +68,11 @@ python local_demo/multimodal_chat.py
 
 The training code is coming soon!
 
+
+## TODO
+- [ ] Clean and release the temporal preference data curation pipeline by March.
+- [ ] Clean and release the training code by March.
+
 ## Citation
 
 If you find this repository useful in your research or work, please consider citing our paper:
