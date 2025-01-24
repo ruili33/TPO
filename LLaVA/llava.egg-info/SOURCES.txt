@@ -61,15 +61,6 @@ llava/model/multimodal_resampler/masked_drop.py
 llava/model/multimodal_resampler/perceiver.py
 llava/model/multimodal_resampler/qformer.py
 llava/model/multimodal_resampler/spatial_pool.py
-llava/serve/__init__.py
-llava/serve/cli.py
-llava/serve/controller.py
-llava/serve/gradio_multi_image.py
-llava/serve/gradio_web_server.py
-llava/serve/model_worker.py
-llava/serve/register_worker.py
-llava/serve/sglang_worker.py
-llava/serve/test_message.py
 llava/train/llama_flash_attn_monkey_patch.py
 llava/train/llava_trainer.py
 llava/train/llava_trainer_eval.py

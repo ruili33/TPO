@@ -144,7 +144,7 @@ class TPO:
 
         self._config = self._model.config
         self.model.eval()
-        self.model.tie_weights()
+        # self.model.tie_weights()
         self.truncation = truncation
         self.batch_size_per_gpu = int(batch_size)
         self.conv_template = conv_template
@@ -317,7 +317,7 @@ class TPO:
 
         # encode, pad, and truncate contexts for this batch
         elif task_type == "image":  # For image task
-            image_tensor = [self._image_processor.preprocess(visuals, self._config)["pixel_values"].cuda().bfloat16()]
+            image_tensor = [self._image_processor.preprocess(visuals, return_tensors="pt")["pixel_values"].cuda().bfloat16()]
             # if type(image_tensor) is list:
             #     image_tensor = [
             #         _image.to(dtype=torch.float16, device=self.device)
@@ -334,7 +334,7 @@ class TPO:
 
             try:
                 if self.video_decode_backend == "decord":
-                    spare_frames,frame_time,video_time = self.load_video(visuals, max_frames)
+                    spare_frames,frame_time,video_time = self.load_video(visuals[0], max_frames)
 
                 video = self._image_processor.preprocess(spare_frames, return_tensors="pt")["pixel_values"].cuda().bfloat16()
                 image_tensor=[video]
@@ -454,7 +454,15 @@ class TPO:
             gen_kwargs["max_new_tokens"],
             max_context_length - input_ids.shape[-1] - num_image_tokens,
         )
-
+        # print("1111111111111",flush=True)
+        # out=self.model.generate(inputs=input_ids,
+        #             attention_mask=attention_masks,
+        #             pad_token_id=pad_token_ids,
+        #             images=image_tensor,
+        #             use_cache=self.use_cache,
+        #             streamer=streamer,
+        #             **gen_kwargs,)
+        # print(out)
         if gen_kwargs["max_new_tokens"] < 1:
             yield json.dumps(
                 {
@@ -521,6 +529,7 @@ def image_demo(model, args):
     try:
         prev = 0
         for x in model.stream_generate_until(query, gen_kwargs):
+            # print(x)
             output = json.loads(x.decode("utf-8").strip("\0"))["text"].strip()
             print(output[prev:], end="", flush=True)
             prev = len(output)
@@ -541,16 +550,16 @@ def video_demo(model, args):
         "task_type": task_type,
         "prev_conv": [],
     }
-    try:
-        prev = 0
-        for x in model.stream_generate_until(query, gen_kwargs):
-            output = json.loads(x.decode("utf-8").strip("\0"))["text"].strip()
-            print(output[prev:], end="", flush=True)
-            prev = len(output)
+    # try:
+    prev = 0
+    for x in model.stream_generate_until(query, gen_kwargs):
+        output = json.loads(x.decode("utf-8").strip("\0"))["text"].strip()
+        print(output[prev:], end="", flush=True)
+        prev = len(output)
 
-        print("\n")
-    except Exception as e:
-        print(e)
+    print("\n")
+    # except Exception as e:
+    #     print(e)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
