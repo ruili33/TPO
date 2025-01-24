@@ -23,6 +23,7 @@ For  LongVA-TPO:
 git clone https://github.com/ruili33/TPO
 cd TPO
 conda create -n TPOLongVA python=3.10
+conda activate TPOLongVA
 pip install torch==2.1.2 torchvision --index-url https://download.pytorch.org/whl/cu118
 pip install -e "longva/.[train]"
 pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
@@ -33,8 +34,9 @@ For LLaVA-Video-TPO:
 ```
 conda create -n TPOllava python=3.10 -y
 conda activate TPOllava
-pip install --upgrade pip  # Enable PEP 660 support.
+pip install --upgrade pip 
 pip install -e "LLaVA/.[train]"
+pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
 ```
 
 ### Inference

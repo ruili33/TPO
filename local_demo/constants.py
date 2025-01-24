@@ -2,15 +2,15 @@ import os
 import hashlib
 
 #############
-# LongVA Demo Utils
+# TPO Demo Utils # Adapted from LongVA Demo
 #############
 
 title_markdown = """
-# [LongVA Multimodal Chat](https://lmm-lab.github.io/LongVA/)
+# [TPO Multimodal Chat](https://ruili33.github.io/tpo_website/)
 """
 
 subtitle_markdown = """
-### This is our research preview of LongVA, a multimodal model that is capable of accurately retrieving visual information from 2000 frames or more than 200K visual tokens.
+### Web demo for TPO models from the paper Temporal Preference Optimization for Long-Form Video Understanding.
 """
 
 html_header = """
@@ -21,7 +21,7 @@ html_header = """
   justify-content: left;
   align-items: center;
   text-align: left;
-  background: linear-gradient(45deg, rgba(195, 253, 245, 1), rgba(255, 0, 80, 0.3));
+  background: linear-gradient(45deg, rgba(20, 20, 120, 0.3), rgba(20, 20, 120, 0.3));
   border-radius: 10px;
   box-shadow: 0 8px 16px 0 rgba(0,0,0,0.1);
   padding: 10px 20px; /* Added padding */
@@ -77,13 +77,11 @@ html_header = """
 </style>
 
 <div class="header-container">
-  <a href="https://lmms-lab.github.io/posts/lmms-eval-0.2/" style="margin-right: 20px; text-decoration: none; display: flex; align-items: center;">
-    <img src="https://i.postimg.cc/JhT7zPj3/assistant-logo.png" alt="LLaVA-NeXT">
-  </a>
+ 
   <div>
-    <h2><a href="https://lmms-lab.github.io/posts/lmms-eval-0.2/">Long Context Transfer from Language to Vision</a></h2>
-    <h5><a href="https://github.com/EvolvingLMMs-Lab/LongVA">Github</a> | <a href="https://huggingface.co/collections/lmms-lab/longva-667538e09329dbc7ea498057">Huggingface</a> | <a href="https://lmms-lab.github.io/posts/longva/">Blog</a> | <a href="https://lmms-lab.github.io/posts/longva/">ArXiv Paper</a></h5>
-    <h5>This is our research preview of LongVA, a multimodal model that is capable of accurately retrieving visual information from 2000 frames or more than 200K visual tokens.</h5>
+    <h2><a href="https://ruili33.github.io/tpo_website/">Temporal Preference Optimization for Long-Form Video Understanding</a></h2>
+    <h5><a href="https://github.com/ruili33/TPO">Github</a> | <a href="https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10">Huggingface</a> | <a href="https://ruili33.github.io/tpo_website/">Blog</a> | <a href="https://arxiv.org/">ArXiv Paper</a></h5>
+    <h5>Web demo for TPO models from the paper Temporal Preference Optimization for Long-Form Video Understanding.</h5>
   </div>
 </div>
 """
@@ -111,12 +109,7 @@ The service is a research preview intended for non-commercial use only, subject 
 bibtext = """
 ## Citation
 ```
-@misc{zhang2024longva,
-    title={LongVA: Long Context Transfer from Language to Vision},
-    url={https://lmms-lab.github.io/posts/longva/},
-    author={Zhang, Peiyuan and Zhang, Kaichen and Li, Bo and Zeng, Guangtao and Yang, Jingkang and Zhang, Yuanhan and Li, Chunyuan and Liu, Ziwei},
-    month={June},
-    year={2024}
+
 }
 ```
 """
