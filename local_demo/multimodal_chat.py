@@ -455,35 +455,7 @@ if __name__ == "__main__":
                     ],
                     inputs=[video, chat_input],
                 )
-                # gr.Examples(
-                #     examples=[
-                #         {
-                #             "files": [
-                #                 f"{PARENT_FOLDER}/assets/user_example_05.jpg",
-                #             ],
-                #             "text": "この猫の目の大きさは、どのような理由で他の猫と比べて特に大きく見えますか？",
-                #         },
-                #         {
-                #             "files": [
-                #                 f"{PARENT_FOLDER}/assets/otter_books.jpg",
-                #             ],
-                #             "text": "Why these two animals are reading books?",
-                #         },
-                #         # {
-                #         #     "files": [
-                #         #         f"{PARENT_FOLDER}/assets/user_example_06.jpg",
-                #         #     ],
-                #         #     "text": "Write the content of this table in a Notion format?",
-                #         # },
-                #         # {
-                #         #     "files": [
-                #         #         f"{PARENT_FOLDER}/assets/user_example_10.png",
-                #         #     ],
-                #         #     "text": "Here's a design for blogging website. Provide the working source code for the website using HTML, CSS and JavaScript as required.",
-                #         # },
-                #     ],
-                #     inputs=[chat_input],
-                # )
+                
 
         gr.Markdown(bibtext)
         
