@@ -18,8 +18,12 @@ from constants import (
 )
 dropdown, js = create_theme_dropdown()
 
-from longva_backend import LongVA
-longva = LongVA(pretrained="ruili0/LongVA-7B-TPO", model_name="llava_qwen", device_map="auto", device="cuda")
+from llava.model.builder import load_pretrained_model
+pretrained = "ruili0/LLaVA-Video-7B-Qwen2-TPO"
+model_name = "llava_qwen"
+device = "cuda"
+device_map = "auto"
+tokenizer, model, image_processor, max_length = load_pretrained_model(pretrained, None, model_name, torch_dtype="bfloat16", device_map=device_map) 
 
 
 def generate_file_hash(file_path):
@@ -286,7 +290,7 @@ if __name__ == "__main__":
 
     with gr.Blocks(
         theme="finlaymacklon/smooth_slate",
-        title="LongVA Multimodal Chat from LMMs-Lab",
+        title="TPO Multimodal Chat",
         css=".message-wrap.svelte-1lcyrx4>div.svelte-1lcyrx4  img {min-width: 50px}",
     ) as demo:
         gr.HTML(html_header)
@@ -490,4 +494,4 @@ if __name__ == "__main__":
         gr.Markdown(learn_more_markdown)
 
     demo.queue(max_size=128)
-    demo.launch(max_threads=8, share=False, server_port=8013, show_error=True, favicon_path=f"{PARENT_FOLDER}/assets/favicon.ico")
+    demo.launch(max_threads=8, share=True, server_port=8013, show_error=True)

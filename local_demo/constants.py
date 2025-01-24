@@ -21,7 +21,7 @@ html_header = """
   justify-content: left;
   align-items: center;
   text-align: left;
-  background: linear-gradient(45deg, rgba(20, 20, 120, 0.3), rgba(20, 20, 120, 0.3));
+  background: #00C0C0;
   border-radius: 10px;
   box-shadow: 0 8px 16px 0 rgba(0,0,0,0.1);
   padding: 10px 20px; /* Added padding */

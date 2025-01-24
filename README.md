@@ -56,6 +56,9 @@ For LLaVA-Video-TPO, please refer to `LLaVA/eval.sh` for the evaluation script.
 ## Datasets
 The TPO dataset for LongVA are available at [Huggingface Dataset](https://huggingface.co/datasets/ruili0/LongVA-TPO-10k).
 
+## Web Demo
+pip install --upgrade gradio
+pip install loguru
 ## Training
 
 The training code is coming soon!
