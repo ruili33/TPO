@@ -245,7 +245,7 @@ def http_bot(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", default="LongVA-7B-DPO", help="Model name")
+    parser.add_argument("--model_name", default="TPO-7B", help="Model name")
     parser.add_argument("--temperature", default="0", help="Temperature")
     parser.add_argument("--max_new_tokens", default="8192", help="Max new tokens")
     args = parser.parse_args()
@@ -293,7 +293,7 @@ if __name__ == "__main__":
         # gr.Markdown(title_markdown)
         # gr.Markdown(subtitle_markdown)
 
-        models = ["LongVA-7B-DPO"]
+        models = ["TPO-7B"]
         with gr.Row():
             with gr.Column(scale=1):
                 model_selector = gr.Dropdown(
@@ -490,4 +490,4 @@ if __name__ == "__main__":
         gr.Markdown(learn_more_markdown)
 
     demo.queue(max_size=128)
-    demo.launch(max_threads=8, share=False, server_port=8000, show_error=True, favicon_path=f"{PARENT_FOLDER}/assets/favicon.ico")
+    demo.launch(max_threads=8, share=False, server_port=8013, show_error=True, favicon_path=f"{PARENT_FOLDER}/assets/favicon.ico")

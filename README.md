@@ -1,4 +1,4 @@
-# Temporal Preference Optimization (TPO) for Long-form Video Understanding
+# Temporal Preference Optimization (TPO) for Long-Form Video Understanding
 
 <a href='https://arxiv.org/abs/2410.17434'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://ruili33.github.io/tpo_website.github.io/'><img src='https://img.shields.io/badge/project-TPO-blue'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/huggingface-datasets-green'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
 
@@ -23,6 +23,7 @@ For  LongVA-TPO:
 git clone https://github.com/ruili33/TPO
 cd TPO
 conda create -n TPOLongVA python=3.10
+conda activate TPOLongVA
 pip install torch==2.1.2 torchvision --index-url https://download.pytorch.org/whl/cu118
 pip install -e "longva/.[train]"
 pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
@@ -35,6 +36,7 @@ conda create -n TPOllava python=3.10 -y
 conda activate TPOllava
 pip install --upgrade pip 
 pip install -e "LLaVA/.[train]"
+pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
 ```
 
 ### Inference
@@ -52,7 +54,7 @@ For LongVA-TPO, please refer to `longva/eval.sh` for the evaluation script.
 For LLaVA-Video-TPO, please refer to `LLaVA/eval.sh` for the evaluation script.
 
 ## Datasets
-The datasets used to .
+The TPO dataset for LongVA are available at [Huggingface Dataset](https://huggingface.co/datasets/ruili0/LongVA-TPO-10k).
 
 ## Training
 
