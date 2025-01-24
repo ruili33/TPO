@@ -12,8 +12,6 @@ import requests
 from theme_dropdown import create_theme_dropdown  # noqa: F401
 from constants import (
     html_header,
-    tos_markdown,
-    learn_more_markdown,
     bibtext,
 )
 dropdown, js = create_theme_dropdown()
@@ -307,7 +305,7 @@ if __name__ == "__main__":
                     sample_frames = gr.Slider(
                         minimum=0,
                         maximum=256,
-                        value=16,
+                        value=128,
                         step=4,
                         interactive=True,
                         label="Sample Frames",
@@ -337,95 +335,43 @@ if __name__ == "__main__":
                         label="Max output tokens",
                     )
 
-                video = gr.Video(label="Input Video", visible=False)
-                gr.Examples(
-                    examples=[
-                        [
-                            f"{PARENT_FOLDER}/assets/dc_demo.mp4",
-                            {
-                                "text": "What's the video about?",
-                            },
-                        ],
-                        [
-                            f"{PARENT_FOLDER}/assets/water.mp4",
-                            {
-                                "text": "Why does the man cook the ice cube in the video?",
-                            },
-                        ],
-                        [
-                            f"{PARENT_FOLDER}/assets/jobs.mp4",
-                            {
-                                "text": "Please conclude this new product launch event.",
-                            },
-                        ],
-                    ],
-                    inputs=[video, chat_input],
-                )
-                gr.Examples(
-                    examples=[
-                        {
-                            "files": [
-                                f"{PARENT_FOLDER}/assets/user_example_05.jpg",
-                            ],
-                            "text": "この猫の目の大きさは、どのような理由で他の猫と比べて特に大きく見えますか？",
-                        },
-                        {
-                            "files": [
-                                f"{PARENT_FOLDER}/assets/otter_books.jpg",
-                            ],
-                            "text": "Why these two animals are reading books?",
-                        },
-                        # {
-                        #     "files": [
-                        #         f"{PARENT_FOLDER}/assets/user_example_06.jpg",
-                        #     ],
-                        #     "text": "Write the content of this table in a Notion format?",
-                        # },
-                        # {
-                        #     "files": [
-                        #         f"{PARENT_FOLDER}/assets/user_example_10.png",
-                        #     ],
-                        #     "text": "Here's a design for blogging website. Provide the working source code for the website using HTML, CSS and JavaScript as required.",
-                        # },
-                    ],
-                    inputs=[chat_input],
-                )
-                with gr.Accordion("More Examples", open=False) as more_examples_row:
-                    gr.Examples(
-                        examples=[
-                            {
-                                "files": [
-                                    f"{PARENT_FOLDER}/assets/otter_books.jpg",
-                                ],
-                                "text": "Why these two animals are reading books?",
-                            },
-                            {
-                                "files": [
-                                    f"{PARENT_FOLDER}/assets/user_example_09.jpg",
-                                ],
-                                "text": "请针对于这幅画写一首中文古诗。",
-                            },
-                            {
-                                "files": [
-                                    f"{PARENT_FOLDER}/assets/white_cat_smile.jpg",
-                                ],
-                                "text": "Why this cat smile?",
-                            },
-                            {
-                                "files": [
-                                    f"{PARENT_FOLDER}/assets/user_example_07.jpg",
-                                ],
-                                "text": "这个是什么猫？",
-                            },
-                        ],
-                        inputs=[chat_input],
-                    )
+                video = gr.Video(label="Input Video", visible=False)        
+                # with gr.Accordion("More Examples", open=False) as more_examples_row:
+                #     gr.Examples(
+                #         examples=[
+                #             {
+                #                 "files": [
+                #                     f"{PARENT_FOLDER}/assets/otter_books.jpg",
+                #                 ],
+                #                 "text": "Why these two animals are reading books?",
+                #             },
+                #             {
+                #                 "files": [
+                #                     f"{PARENT_FOLDER}/assets/user_example_09.jpg",
+                #                 ],
+                #                 "text": "请针对于这幅画写一首中文古诗。",
+                #             },
+                #             {
+                #                 "files": [
+                #                     f"{PARENT_FOLDER}/assets/white_cat_smile.jpg",
+                #                 ],
+                #                 "text": "Why this cat smile?",
+                #             },
+                #             {
+                #                 "files": [
+                #                     f"{PARENT_FOLDER}/assets/user_example_07.jpg",
+                #                 ],
+                #                 "text": "这个是什么猫？",
+                #             },
+                #         ],
+                #         inputs=[chat_input],
+                #     )
                 with gr.Accordion("base 64 API", open=False) as parameter_row:
                     input_json = gr.JSON(label="Input Json (OpenAI API compabible)")
                     output_ = gr.Textbox(label="Output")
                     bttn = gr.Button(value="Generate")
                     bttn.click(base64_api, inputs= input_json, outputs=output_, api_name="json_api_request")
-                    
+                
             with gr.Column(scale=9):
                 chatbot.render()
                 chat_input.render()
@@ -483,6 +429,61 @@ if __name__ == "__main__":
                     ).then(
                         lambda: gr.Video(value=None), None, [video]  # Set video to None
                     )
+        with gr.Row():
+            with gr.Column(scale=1):
+                # video = gr.Video(label="Input Video", visible=False)
+                gr.Examples(
+                    examples=[
+                        [
+                            f"{PARENT_FOLDER}/assets/dc_demo.mp4",
+                            {
+                                "text": "According to the video, which stage is considered the earliest stage of human evolution?",
+                            },
+                        ],
+                        # [
+                        #     f"{PARENT_FOLDER}/assets/count.mp4",
+                        #     {
+                        #         "text": "According to the video, how many individuals were in the car when Archduke Franz Ferdinand was assassinated?",
+                        #     },
+                        # ],
+                        [
+                            f"{PARENT_FOLDER}/assets/festival.mp4",
+                            {
+                                "text": "What is one of the symbols of the festival that is introduced by the video?",
+                            },
+                        ],
+                    ],
+                    inputs=[video, chat_input],
+                )
+                # gr.Examples(
+                #     examples=[
+                #         {
+                #             "files": [
+                #                 f"{PARENT_FOLDER}/assets/user_example_05.jpg",
+                #             ],
+                #             "text": "この猫の目の大きさは、どのような理由で他の猫と比べて特に大きく見えますか？",
+                #         },
+                #         {
+                #             "files": [
+                #                 f"{PARENT_FOLDER}/assets/otter_books.jpg",
+                #             ],
+                #             "text": "Why these two animals are reading books?",
+                #         },
+                #         # {
+                #         #     "files": [
+                #         #         f"{PARENT_FOLDER}/assets/user_example_06.jpg",
+                #         #     ],
+                #         #     "text": "Write the content of this table in a Notion format?",
+                #         # },
+                #         # {
+                #         #     "files": [
+                #         #         f"{PARENT_FOLDER}/assets/user_example_10.png",
+                #         #     ],
+                #         #     "text": "Here's a design for blogging website. Provide the working source code for the website using HTML, CSS and JavaScript as required.",
+                #         # },
+                #     ],
+                #     inputs=[chat_input],
+                # )
 
         gr.Markdown(bibtext)
         

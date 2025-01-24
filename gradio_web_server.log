@@ -1,4 +1,0 @@
-2025-01-23 19:46:20 | ERROR | stderr | Traceback (most recent call last):
-2025-01-23 19:46:20 | ERROR | stderr |   File "/pasteur/u/ruili/TPO/LLaVA/llava/serve/gradio_web_server.py", line 20, in <module>
-2025-01-23 19:46:20 | ERROR | stderr |     no_change_btn = gr.Button.update()
-2025-01-23 19:46:20 | ERROR | stderr | AttributeError: type object 'Button' has no attribute 'update'
