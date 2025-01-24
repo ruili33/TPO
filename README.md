@@ -70,8 +70,8 @@ The training code is coming soon!
 
 
 ## TODO
-- [ ] Clean and release the temporal preference data curation pipeline by March.
-- [ ] Clean and release the training code by March.
+- [ ] Release the temporal preference data curation pipeline by March.
+- [ ] Release the training code by March.
 
 ## Citation
 
