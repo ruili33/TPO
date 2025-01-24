@@ -18,13 +18,8 @@ from constants import (
 )
 dropdown, js = create_theme_dropdown()
 
-from llava.model.builder import load_pretrained_model
-pretrained = "ruili0/LLaVA-Video-7B-Qwen2-TPO"
-model_name = "llava_qwen"
-device = "cuda"
-device_map = "auto"
-tokenizer, model, image_processor, max_length = load_pretrained_model(pretrained, None, model_name, torch_dtype="bfloat16", device_map=device_map) 
-
+from TPO_backend import TPO
+tpo = TPO(pretrained="ruili0/LLaVA-Video-7B-Qwen2-TPO", model_name="llava_qwen", device_map="auto", device="cuda")
 
 def generate_file_hash(file_path):
     sha256_hash = hashlib.sha256()
@@ -108,7 +103,7 @@ def base64_api(input_json, input_text):
     }
     # use stream generate until
     print("calling base64_api")
-    for x in longva.stream_generate_until(request, gen_kwargs):
+    for x in tpo.stream_generate_until(request, gen_kwargs):
         output = json.loads(x.decode("utf-8").strip("\0"))["text"].strip()
     return output
     
@@ -194,7 +189,7 @@ def http_bot(
                     "task_type": task_type,
                 }
                 prev = 0
-                for x in longva.stream_generate_until(request, gen_kwargs):
+                for x in tpo.stream_generate_until(request, gen_kwargs):
                     output = json.loads(x.decode("utf-8").strip("\0"))["text"].strip()
                     print(output[prev:], end="", flush=True)
                     state[-1][1] += output[prev:]
@@ -212,7 +207,7 @@ def http_bot(
                     "task_type": task_type,
                 }
                 prev = 0
-                for x in longva.stream_generate_until(request, gen_kwargs):
+                for x in tpo.stream_generate_until(request, gen_kwargs):
                     output = json.loads(x.decode("utf-8").strip("\0"))["text"].strip()
                     print(output[prev:], end="", flush=True)
                     state[-1][1] += output[prev:]
@@ -230,7 +225,7 @@ def http_bot(
                 gen_kwargs["sample_frames"] = sample_frames
 
                 prev = 0
-                for x in longva.stream_generate_until(request, gen_kwargs):
+                for x in tpo.stream_generate_until(request, gen_kwargs):
                     output = json.loads(x.decode("utf-8").strip("\0"))["text"].strip()
                     print(output[prev:], end="", flush=True)
                     state[-1][1] += output[prev:]
