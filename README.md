@@ -1,6 +1,6 @@
 # Temporal Preference Optimization (TPO) for Long-Form Video Understanding
 
-<a href='https://arxiv.org/abs/2501.13919v1'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://ruili33.github.io/tpo_website/'><img src='https://img.shields.io/badge/project-TPO-blue'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/huggingface-datasets-green'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
+<a href='https://arxiv.org/abs/2501.13919v3'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://ruili33.github.io/tpo_website/'><img src='https://img.shields.io/badge/project-TPO-blue'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/huggingface-datasets-green'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
 
 
 <img src="asset/cvpr_figure_TPO.png"></img>
@@ -77,14 +77,11 @@ The training code is coming soon!
 
 If you find this repository useful in your research or work, please consider citing our paper:
 ```
-@misc{li2025temporalpreferenceoptimizationlongform,
-      title={Temporal Preference Optimization for Long-Form Video Understanding}, 
-      author={Rui Li and Xiaohan Wang and Yuhui Zhang and Zeyu Wang and Serena Yeung-Levy},
-      year={2025},
-      eprint={2501.13919},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2501.13919}, 
+@article{li2025temporal,
+      title={Temporal Preference Optimization for Long-Form Video Understanding},
+      author={Li, Rui and Wang, Xiaohan and Zhang, Yuhui and Zohar, Orr and Wang, Zeyu and Yeung-Levy, Serena},
+      journal={arXiv preprint arXiv:2501.13919},
+      year={2025}
 }
 ```
 
