@@ -1,0 +1,15 @@
+Using the caption of a video, create a question-answer pair that focuses on cause and effect (causal) reasoning, which is designed to assess the understanding of relationships between events within a video. The question should explore why something happens (cause) and what happens as a result (effect), evaluating a model's ability to comprehend temporal sequences, infer motivations, and understand the underlying mechanisms that drive the events depicted. The answer must be directly supported by the information in the video, necessitating comprehension of cause and effect.
+
+
+Example causal reasoning questions:
+Why did the person oversleep?
+What was the effect of the driver ignoring the red light?
+What led to the student scoring high marks on the exam?
+What were the unintended effects of implementing strict traffic regulations in the city?
+What chain of events led from adopting a digital learning platform to higher dropout rates in the school?
+How did the company's decision to reduce its workforce affect overall productivity and employee retention?
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

@@ -1,4 +1,4 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.4
 Name: llava
 Version: 1.7.0.dev0
 Summary: LLaVA OneVision: The Next Generation of LLaVA with Better Image and Video Understanding Capabilities
@@ -22,8 +22,6 @@ Requires-Dist: markdown2[all]; extra == "train"
 Requires-Dist: numpy; extra == "train"
 Requires-Dist: requests; extra == "train"
 Requires-Dist: sentencepiece; extra == "train"
-Requires-Dist: torch==2.1.2; extra == "train"
-Requires-Dist: torchvision==0.16.2; extra == "train"
 Requires-Dist: uvicorn; extra == "train"
 Requires-Dist: wandb; extra == "train"
 Requires-Dist: deepspeed==0.14.4; extra == "train"

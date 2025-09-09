@@ -1,0 +1,19 @@
+Using the caption of a video, create a question-answer pair that focuses on action reasoning, which is designed to determine the number of occurrences of specific objects, events, or actions within a video clip. These questions assess a model's ability to not only recognize and track entities over time but also to perform temporal reasoning and handle challenges such as occlusions, perspective changes, and varying object appearances.
+
+
+Example counting questions:
+How many cats appear in the video?
+How many times does the person jump in the video?
+How many goals are scored in the soccer match highlight?
+How many times do two cars pass each other on the road?
+How many red balloons are released into the sky?
+What is the total number of vehicles that cross the intersection during rush hour in the video?
+How many times does the chef flip the pancake in the cooking tutorial?
+How many times does the security camera capture someone entering the restricted area?
+Across all scenes in the video, how many different animals are shown?
+
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

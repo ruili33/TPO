@@ -1,0 +1,25 @@
+Using the caption of a video, create a question-answer pair that focuses on spatial reasoning. The question should require understanding of the spatial relationships and configurations of objects, people, and environments within a video. This includes understanding positions, orientations, movements, distances, and interactions among various elements over time. The answer must be directly supported by the information in the video, necessitating comprehension of spatial interactions or order of actions.
+
+Question Guidelines:
+The question should involve reasoning about the spatial relationships between objects or actions.
+Focus on relative positions, changes in position, or predicted outcomes based on observed events.
+Examples of valid reasoning include: identifying object locations relative to other objects, predicting future actions, or determining the order of events based on spatial interactions.
+
+Example spatial reasoning questions:
+In the video, what is the object to the left of the red ball when the blue ball appears?
+Did the yellow cat ever sit under the table during the video?
+Which object traveled a greater distance, the drone or the bird?
+Did the stack of books fall over when the door was closed?
+Is the cyclist ahead of the runner throughout the race?
+Which direction does the boat turn after passing the buoy?
+What will happen if the ball rolls toward the edge of the table?
+How does the arrangement of the books on the shelf change during the video?
+What happens when the boy throws the basketball towards the hoop?
+What shape does the dancer form with her arms at the climax of the performance?
+Where does the waiter place the glass in relation to the plate?
+How far does the soccer ball travel before it is intercepted?
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

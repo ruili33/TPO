@@ -1,0 +1,26 @@
+Using the caption of a video, create a question-answer pair that focuses on information summarization and synthesis, which involves not just recognizing objects or actions but also understanding the narrative, extracting essential information, and conveying it concisely. 
+
+Information summarization in the context of video QA requires models to process sequences of visual and auditory data to generate coherent summaries or answers that encapsulate the main events or information presented in the video. Potential tasks related to this include:
+
+    Event Summarization: Condensing a series of events in a video into a brief summary.
+    Temporal Reasoning: Understanding the sequence of events and their temporal relationships.
+    Causal Inference: Identifying cause-and-effect relationships within the video content.
+    Emotional and Sentiment Analysis: Interpreting the emotional states of characters and the overall sentiment of scenes.
+    Narrative Comprehension: Grasping the storyline or plot of the video.
+
+
+Example information summarization and synthesis questions:
+Summarize the main events that occurred in the video.
+What happened after the protagonist left the house?
+Why did the crowd start cheering at the end of the video?
+What is the underlying theme of the video?
+Describe the setting of the opening scene.
+Generate descriptive captions for the video, focusing on the actions and interactions between characters.
+Based on the video, craft a narrative that describes the journey of the protagonist, including challenges faced and lessons learned.
+List all the significant events that occur during the sports match in the video, including scores and key plays.
+
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

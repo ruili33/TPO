@@ -38,7 +38,6 @@ import tokenizers
 from llava.constants import IGNORE_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN, IMAGE_TOKEN_INDEX
 from torch.utils.data import Dataset
 from llava.train.llava_trainer import LLaVADPOTrainer
-from data_processing.utils import load_jsonl, load_json
 from llava import conversation as conversation_lib
 from llava.model import *
 from llava.model.language_model.llava_qwen import LlavaQwenConfig
@@ -61,7 +60,28 @@ local_rank = None
 import numpy as np
 
 IS_TOKENIZER_GREATER_THAN_0_14 = version.parse(tokenizers.__version__) >= version.parse("0.14")
+VIDEO_EXTENSIONS = (
+    '.mp4', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.mpeg', '.mpg', 
+    '.m4v', '.3gp', '.webm', '.vob', '.ogv', '.ts', '.m2ts', '.mts', 
+    '.f4v', '.rmvb', '.rm', '.divx', '.xvid', '.asf'
+)
+DEFAULT_NUM_VIDEO_FRAMES = 32
+DEFAULT_VIDEO_FPS = 1
+DEFAULT_NUM_RETRIES = 3
+DEFAULT_FINAL_RETRIES = 300
+DEFAULT_IMAGE_SIZE = 448
+DEFAULT_CROP_SIZE = 336
 
+def load_jsonl(save_path):
+    with open(save_path, "r") as f:
+        data = [json.loads(line) for line in f.readlines()]
+    return data
+
+
+def load_json(path):
+    with open(path, "r") as f:
+        data = json.load(f)
+    return data
 
 @dataclass
 class ModelArguments:
@@ -105,7 +125,7 @@ class ModelArguments:
     mm_qformer_depth: Optional[int] = field(default=3)
     mm_qformer_latents: Optional[int] = field(default=32)
     mm_qformer_pretrained: Optional[str] = field(default=None)
-
+    add_faster_video: Optional[bool] = field(default=False)
     rope_scaling_factor: Optional[float] = field(default=None)
     rope_scaling_type: Optional[str] = field(default=None)
 
@@ -904,7 +924,83 @@ def load_data(data_path):
         data_list = load_json(data_path)
     return data_list
 
+def list_files_in_directory(directory_path: str) -> Dict[str, str]:
+    """
+    List all video files in a directory and return a mapping of base names to paths.
+    
+    Args:
+        directory_path: Path to the directory to search
+        
+    Returns:
+        Dictionary mapping file base names (without extension) to their absolute paths
+        
+    Raises:
+        FileNotFoundError: If the directory doesn't exist
+        PermissionError: If directory access is denied
+    """
+    if not os.path.exists(directory_path):
+        raise FileNotFoundError(f"Directory not found: {directory_path}")
+    
+    if not os.path.isdir(directory_path):
+        raise ValueError(f"Path is not a directory: {directory_path}")
+    
+    files_dict = {}
+    
+    try:
+        for filename in os.listdir(directory_path):
+            file_path = os.path.join(directory_path, filename)
+            
+            # Check if it's a file and has a video extension
+            if os.path.isfile(file_path):
+                file_base_name = os.path.splitext(filename)[0]
+                absolute_path = os.path.abspath(file_path)
+                
+                if absolute_path.lower().endswith(VIDEO_EXTENSIONS):
+                    files_dict[file_base_name] = absolute_path
+                    
+    except PermissionError:
+        logging.error(f"Permission denied accessing directory: {directory_path}")
+        raise
+    
+    return files_dict
 
+from decord import VideoReader, cpu
+def load_video( video_path, max_frames_num,fps=1,force_sample=False):
+    if max_frames_num == 0:
+        logging.warning("max_frames_num is 0, returning zero array")
+        return np.zeros((1, DEFAULT_CROP_SIZE, DEFAULT_CROP_SIZE, 3)), "0.00s", 0.0
+    
+    if not os.path.exists(video_path):
+        raise FileNotFoundError(f"Video file not found: {video_path}")
+    
+    try:
+        vr = VideoReader(video_path, ctx=cpu(0), num_threads=1)
+        total_frame_num = len(vr)
+        
+        if total_frame_num == 0:
+            logging.warning(f"Video has no frames: {video_path}")
+            return np.zeros((1, DEFAULT_CROP_SIZE, DEFAULT_CROP_SIZE, 3)), "0.00s", 0.0
+        
+        avg_fps = vr.get_avg_fps()
+        video_time = total_frame_num / avg_fps
+        sampling_fps = round(avg_fps / fps)
+        
+        frame_idx = [i for i in range(0, total_frame_num, sampling_fps)]
+        frame_time = [i / sampling_fps for i in frame_idx]
+        
+        if len(frame_idx) > max_frames_num or force_sample:
+            uniform_sampled_frames = np.linspace(0, total_frame_num - 1, max_frames_num, dtype=int)
+            frame_idx = uniform_sampled_frames.tolist()
+            frame_time = [i / avg_fps for i in frame_idx]
+        
+        frame_time_str = ",".join([f"{i:.2f}s" for i in frame_time])
+        spare_frames = vr.get_batch(frame_idx).asnumpy()
+        
+        return spare_frames, frame_time_str, video_time
+        
+    except Exception as e:
+        logging.error(f"Error loading video {video_path}: {e}")
+        raise
 class DPODataset(Dataset):
     """Dataset for DPODataset fine-tuning."""
 
@@ -974,7 +1070,8 @@ class DPODataset(Dataset):
         rank0_print("Formatting inputs...Skip in lazy mode")
         self.tokenizer = tokenizer
         self.data_args = data_args
-
+        # self.video_file_list=list_files_in_directory(self.data_args.video_folder)
+        self.video_folder=self.data_args.video_folder
     def __len__(self):
         return len(self.list_data_dict)
 
@@ -994,7 +1091,8 @@ class DPODataset(Dataset):
         length_list = []
         for sample in self.list_data_dict:
             # Calculate the length of the prompt, answer, chosen, and rejected text
-            cur_len = len(sample["prompt"].split()) + len(sample["answer"].split()) + len(sample["chosen"].split()) + len(sample["rejected"].split())
+            # cur_len = len(sample["prompt"].split()) + len(sample["answer"].split()) + len(sample["chosen"].split()) + len(sample["rejected"].split())
+            cur_len= sum([len(i['value'].split()) for i in sample['chosen']])
             # If the sample includes a video, the length is positive; otherwise, it is negative
             cur_len = cur_len if ("video" in sample or "image" in sample) else -cur_len
             length_list.append(cur_len)
@@ -1057,7 +1155,6 @@ class DPODataset(Dataset):
         for attempt_idx in range(num_base_retries):
             try:
                 next_index = min(i + 1, len(self.list_data_dict) - 1)
-                # sample_idx = random.choice(range(len(self)))
                 sample = self._get_item(next_index)
                 return sample
             except Exception as e:
@@ -1065,18 +1162,47 @@ class DPODataset(Dataset):
                 print(f"[Try other #{attempt_idx}] Failed to fetch sample {next_index}. Exception:", e)
                 pass
 
-        # still fail, most likely to be path issue or cloud disk issue, retry the same sample for longer
-        # for attempt_idx in range(num_final_retries):
-        #     try:
-        #         sample = self._get_item(i)
-        #         return sample
-        #     except Exception as e:
-        #         # sleep 1s in case it is a cloud disk issue
-        #         print(f"[Final try #{attempt_idx}] Failed to fetch sample {i}. Exception:", e)
-        #         time.sleep(1)
-
-        # Finally raise exception on failing.
-        assert False, "Failed to fetch sample."
+        # If all attempts fail, raise an exception
+        raise RuntimeError(f"Failed to fetch sample {i} after all retry attempts")
+    @staticmethod
+    def _load_video(
+        video_path: str, 
+        num_video_frames: int, 
+        data_args: DataArguments, 
+        fps: Optional[int] = None, 
+        frame_count: Optional[int] = None,
+        start: Optional[float] = None,
+        end: Optional[float] = None
+    ) -> tuple:
+        """
+        Load video frames using OpenCV extraction.
+        
+        Args:
+            video_path: Path to the video file
+            num_video_frames: Number of frames to extract
+            data_args: Data processing arguments
+            fps: Frames per second for extraction
+            frame_count: Total frame count
+            start: Start time for extraction
+            end: End time for extraction
+            
+        Returns:
+            Tuple of (PIL images list, success_flag)
+        """
+        from llava.mm_utils import opencv_extract_frames
+        
+        try:
+            pil_imgs = opencv_extract_frames(
+                video_path, num_video_frames, fps, frame_count, start=start, end=end
+            )
+            return pil_imgs, True
+            
+        except Exception as e:
+            logging.error(f"Error processing video {video_path}: {e}")
+            
+            # Create fallback black images
+            fallback_imgs = [Image.new("RGB", (DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE), (0, 0, 0))] * num_video_frames
+            return fallback_imgs, False
 
     def _get_item(self, i) -> Dict[str, torch.Tensor]:
         sources = self.list_data_dict[i]
@@ -1094,9 +1220,9 @@ class DPODataset(Dataset):
             # sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
 
         elif "video" in sources[0]:  # FIXME: This logic should be largely improved by Yuanhan. It's too messy now.
-            video_file = self.list_data_dict[i]["video"]
-            video_folder = self.data_args.video_folder
-            video_file = os.path.join(video_folder, video_file)
+            # video_file = self.list_data_dict[i]["video"]
+            # video_folder = self.data_args.video_folder
+            video_file = f"{self.video_folder}/{self.list_data_dict[i]['data_source']}/{self.list_data_dict[i]['video']}"
             suffix = video_file.split(".")[-1]
             if not os.path.exists(video_file):
                 print("File {} not exist!".format(video_file))
@@ -1110,24 +1236,28 @@ class DPODataset(Dataset):
                 sources, query_prompt = preprocess_multimodal_movie(copy.deepcopy([e["conversations"] for e in sources]), self.data_args, input_prompt)
             else:  # using videoreader
                 if "shareVideoGPTV" not in video_file and "liangke" not in video_file:
-                    vr = VideoReader(video_file, ctx=cpu(0))
-                    total_frame_num = len(vr)
-                    avg_fps = round(vr.get_avg_fps() / self.data_args.video_fps)
-                    frame_idx = [i for i in range(0, total_frame_num, avg_fps)]
-                    if self.data_args.frames_upbound > 0:
-                        if len(frame_idx) > self.data_args.frames_upbound:
-                            uniform_sampled_frames = np.linspace(0, total_frame_num - 1, self.data_args.frames_upbound, dtype=int)
-                            frame_idx = uniform_sampled_frames.tolist()
-                    video = vr.get_batch(frame_idx).asnumpy()
-                    video = np.array(video)
+                    # vr = VideoReader(video_file, ctx=cpu(0))
+                    # total_frame_num = len(vr)
+                    # avg_fps = round(vr.get_avg_fps() / self.data_args.video_fps)
+                    # frame_idx = [i for i in range(0, total_frame_num, avg_fps)]
+                    # if self.data_args.frames_upbound > 0:
+                    #     if len(frame_idx) > self.data_args.frames_upbound:
+                    #         uniform_sampled_frames = np.linspace(0, total_frame_num - 1, self.data_args.frames_upbound, dtype=int)
+                    #         frame_idx = uniform_sampled_frames.tolist()
+                    # video = vr.get_batch(frame_idx).asnumpy()
+                    # video = np.array(video)
+                    video, frame_time, video_time = load_video(
+                        video_file, DEFAULT_NUM_VIDEO_FRAMES, DEFAULT_VIDEO_FPS, force_sample=True
+                    )
+                    # video, video_loading_succeed = load_video(video_file, 32, self.data_args, fps=None, frame_count=32,start=0,end=1)
                 else:
                     if "liangke" in video_file:
                         video_file = self.list_data_dict[i]["video"]
                     frame_files = [os.path.join(video_file, f) for f in os.listdir(video_file) if os.path.isfile(os.path.join(video_file, f))]
                     frame_files.sort()  # Ensure the frames are sorted if they are named sequentially
 
-                    # TODO: Hard CODE: Determine the indices for uniformly sampling 10 frames
-                    num_frames_to_sample = 10
+                    # Determine the indices for uniformly sampling frames
+                    num_frames_to_sample = DEFAULT_NUM_VIDEO_FRAMES
 
                     total_frames = len(frame_files)
 
@@ -1143,7 +1273,7 @@ class DPODataset(Dataset):
                                 video.append(frame)
                         except IOError:
                             print(f"Failed to read frame at path: {frame_path}")
-
+                
                 processor = self.data_args.image_processor
                 image = processor.preprocess(video, return_tensors="pt")["pixel_values"]
                 image = [(image, video[0].size, "video")]
@@ -1151,18 +1281,26 @@ class DPODataset(Dataset):
 
         else:
             sources = copy.deepcopy([e["conversations"] for e in sources])
-
+        time_instruciton = f"The video lasts for {video_time:.2f} seconds, and {len(video[0])} frames are uniformly sampled from it. These frames are located at {frame_time}.Please answer the following questions related to this video."
         has_image = ("image" in self.list_data_dict[i]) or ("video" in self.list_data_dict[i])
         # data_dict = preprocess(sources, self.tokenizer, has_image=has_image)
         data_dict = copy.deepcopy(self.list_data_dict[i])  # inplace modification following
+        question = sources[0]["chosen"][0]['value']
+        question = question.replace("<image>\n", "").replace("\n<image>", "").replace("<image>", "")
+        question = question.replace("<video>\n", "").replace("\n<video>", "").replace("<video>", "")
+        # question = "<image>\n" + question
+        question = DEFAULT_IMAGE_TOKEN + f"{time_instruciton}\n{question}"
+        data_dict['chosen'][0]['value']=question
+        data_dict['rejected'][0]['value']=question
 
-        if "prompt" in data_dict:
-            prompt = data_dict["prompt"]
-            prompt = prompt.replace("<image>", "").strip()
-            prompt = "<image>\n" + prompt
-            data_dict["prompt"] = prompt
-        else:
-            prompt = None
+
+        # if "prompt" in data_dict:
+        #     prompt = data_dict["prompt"]
+        #     prompt = prompt.replace("<image>", "").strip()
+        #     prompt = "<image>\n" + prompt
+        #     data_dict["prompt"] = prompt
+        # else:
+        #     prompt = None
 
         if suffix == "pkl":
             prompt = [query_prompt]
@@ -1236,7 +1374,7 @@ class DPODataCollator(DPODataCollatorWithPadding):
             padded_batch[attn_k] = padded_batch[k].ne(self.tokenizer.pad_token_id)
         return padded_batch
 
-    def tokenize_batch_element(self, prompt: str, chosen: str, rejected: str, has_image: bool = True) -> Dict:
+    def tokenize_batch_element(self, chosen: str, rejected: str, has_image: bool = True) -> Dict:
         """Tokenize a single batch element.
 
         At this stage, we don't convert to PyTorch tensors yet; we just handle the truncation
@@ -1250,8 +1388,8 @@ class DPODataCollator(DPODataCollatorWithPadding):
         # import pdb; pdb.set_trace()
         batch = {}
 
-        chosen_sources = make_conv(prompt, chosen)
-        rejected_sources = make_conv(prompt, rejected)
+        chosen_sources =  chosen
+        rejected_sources =  rejected
         chosen_data_dict = preprocess([chosen_sources], self.tokenizer, has_image=has_image)
         # chosen_data_dict['attention_mask'] = chosen_data_dict["input_ids"].ne(self.tokenizer.pad_token_id)
 
@@ -1276,14 +1414,13 @@ class DPODataCollator(DPODataCollatorWithPadding):
         tokenized_batch = []
         Xs, keys = [], []
         for feature in features:
-            prompt = feature["prompt"]
             chosen = feature["chosen"]
             rejected = feature["rejected"]
             has_image = feature["has_image"]
             # Xs.append(feature[has_X])
             # keys.append(has_X)
 
-            batch_element = self.tokenize_batch_element(prompt, chosen, rejected, has_image=has_image)
+            batch_element = self.tokenize_batch_element( chosen, rejected, has_image=has_image)
             tokenized_batch.append(batch_element)
 
         # return collated batch
@@ -1631,58 +1768,59 @@ def train(attn_implementation=None):
         model.config.tokenizer_model_max_length = tokenizer.model_max_length
 
         ### Deciding train which part of the model
-        if model_args.mm_tunable_parts is None:  # traditional way of deciding which part to train
-            model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
-            model.config.tune_mm_vision_resampler = training_args.tune_mm_vision_resampler = model_args.tune_mm_vision_resampler
-            if model_args.tune_mm_mlp_adapter or model_args.tune_mm_vision_resampler:
-                model.requires_grad_(False)
-            if model_args.tune_mm_mlp_adapter:
-                for p in model.get_model().mm_projector.parameters():
-                    p.requires_grad = True
-            if model_args.tune_mm_vision_resampler:
-                for p in model.get_model().vision_resampler.parameters():
-                    p.requires_grad = True
+        if not training_args.lora_enable:
+            if model_args.mm_tunable_parts is None:  # traditional way of deciding which part to train
+                model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
+                model.config.tune_mm_vision_resampler = training_args.tune_mm_vision_resampler = model_args.tune_mm_vision_resampler
+                if model_args.tune_mm_mlp_adapter or model_args.tune_mm_vision_resampler:
+                    model.requires_grad_(False)
+                if model_args.tune_mm_mlp_adapter:
+                    for p in model.get_model().mm_projector.parameters():
+                        p.requires_grad = True
+                if model_args.tune_mm_vision_resampler:
+                    for p in model.get_model().vision_resampler.parameters():
+                        p.requires_grad = True
 
-            model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
-            if training_args.freeze_mm_mlp_adapter:
-                for p in model.get_model().mm_projector.parameters():
-                    p.requires_grad = False
+                model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
+                if training_args.freeze_mm_mlp_adapter:
+                    for p in model.get_model().mm_projector.parameters():
+                        p.requires_grad = False
 
-            model.config.freeze_mm_vision_resampler = training_args.freeze_mm_vision_resampler
-            if training_args.freeze_mm_vision_resampler:
-                for p in model.get_model().vision_resampler.parameters():
-                    p.requires_grad = False
+                model.config.freeze_mm_vision_resampler = training_args.freeze_mm_vision_resampler
+                if training_args.freeze_mm_vision_resampler:
+                    for p in model.get_model().vision_resampler.parameters():
+                        p.requires_grad = False
 
-            model.config.unfreeze_mm_vision_tower = model_args.unfreeze_mm_vision_tower
-            if model_args.unfreeze_mm_vision_tower:
-                vision_tower.requires_grad_(True)
+                model.config.unfreeze_mm_vision_tower = model_args.unfreeze_mm_vision_tower
+                if model_args.unfreeze_mm_vision_tower:
+                    vision_tower.requires_grad_(True)
+                else:
+                    vision_tower.requires_grad_(False)
+
             else:
+                rank0_print(f"Using mm_tunable_parts: {model_args.mm_tunable_parts}")
+                model.config.mm_tunable_parts = training_args.mm_tunable_parts = model_args.mm_tunable_parts
+                # Set the entire model to not require gradients by default
+                model.requires_grad_(False)
                 vision_tower.requires_grad_(False)
-
-        else:
-            rank0_print(f"Using mm_tunable_parts: {model_args.mm_tunable_parts}")
-            model.config.mm_tunable_parts = training_args.mm_tunable_parts = model_args.mm_tunable_parts
-            # Set the entire model to not require gradients by default
-            model.requires_grad_(False)
-            vision_tower.requires_grad_(False)
-            model.get_model().mm_projector.requires_grad_(False)
-            model.get_model().vision_resampler.requires_grad_(False)
-            # Parse the mm_tunable_parts to decide which parts to unfreeze
-            tunable_parts = model_args.mm_tunable_parts.split(",")
-            if "mm_mlp_adapter" in tunable_parts:
-                for p in model.get_model().mm_projector.parameters():
-                    p.requires_grad = True
-            if "mm_vision_resampler" in tunable_parts:
-                for p in model.get_model().vision_resampler.parameters():
-                    p.requires_grad = True
-            if "mm_vision_tower" in tunable_parts:
-                for name, param in model.named_parameters():
-                    if "vision_tower" in name:
-                        param.requires_grad_(True)
-            if "mm_language_model" in tunable_parts:
-                for name, param in model.named_parameters():
-                    if "vision_tower" not in name and "mm_projector" not in name and "vision_resampler" not in name:
-                        param.requires_grad_(True)
+                model.get_model().mm_projector.requires_grad_(False)
+                model.get_model().vision_resampler.requires_grad_(False)
+                # Parse the mm_tunable_parts to decide which parts to unfreeze
+                tunable_parts = model_args.mm_tunable_parts.split(",")
+                if "mm_mlp_adapter" in tunable_parts:
+                    for p in model.get_model().mm_projector.parameters():
+                        p.requires_grad = True
+                if "mm_vision_resampler" in tunable_parts:
+                    for p in model.get_model().vision_resampler.parameters():
+                        p.requires_grad = True
+                if "mm_vision_tower" in tunable_parts:
+                    for name, param in model.named_parameters():
+                        if "vision_tower" in name:
+                            param.requires_grad_(True)
+                if "mm_language_model" in tunable_parts:
+                    for name, param in model.named_parameters():
+                        if "vision_tower" not in name and "mm_projector" not in name and "vision_resampler" not in name:
+                            param.requires_grad_(True)
 
         total_params = sum(p.ds_numel if hasattr(p, "ds_numel") else p.numel() for p in model.parameters())
         trainable_params = sum(p.ds_numel if hasattr(p, "ds_numel") else p.numel() for p in model.parameters() if p.requires_grad)

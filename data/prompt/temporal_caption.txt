@@ -1,0 +1,13 @@
+Given the caption of a video, generate a question-answer pair that focuses on temporal reasoning by analyzing the sequence and timing of events. The question should require reasoning about the order of previous, present, or future actions within the video's context. The answer must be directly supported by the information provided in the video, requiring the model to understand how events unfold over time.
+
+Example temporal reasoning questions:
+What action happens immediately after the person removes the bread from the oven?
+Why does the teacher talk to the student right before the class?
+What event signals the beginning of the race?
+What happens when the player kicks the ball toward the goal?
+What was the last step the boy took before riding the bicycle?
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

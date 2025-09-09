@@ -1,0 +1,20 @@
+Using the caption of a video, create a question-answer pair that focuses on action reasoning, which is designed to evaluate an AI model's ability to comprehend and interpret actions within a video context. Action reasoning requires a deeper understanding of the temporal dynamics, causality, intentions, and interactions depicted in the video. This type of question assesses whether a model can not only detect actions but also reason about why they occur, predict future actions, and understand the relationships between different actions. The answer must be directly supported by the information in the video, necessitating comprehension of action.
+
+
+Example action reasoning questions:
+How did the teammates coordinate to score the goal?
+Describe how the magician made the rabbit disappear.
+What steps did the mechanic take to fix the engine?
+How did the hiker find his way back after getting lost?
+What is the person attempting to do by pressing buttons on the vending machine?
+What is the boy trying to achieve by stacking the blocks?
+What are the children attempting to do by forming a human pyramid?
+What routine does the teacher follow at the start of each class?
+Why is the dog waiting by the door every evening?
+Why did everyone remove their shoes before entering the house?
+
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

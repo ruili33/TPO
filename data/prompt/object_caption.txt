@@ -1,0 +1,30 @@
+Using the caption of a video, create a question-answer pair that focuses on object analysis, which encompass multiple dimensions of object-related information within a video. These questions aim to provide a complete understanding of objects by addressing their identification, localization, tracking, classification, attributes, interactions, temporal dynamics, actions, and the broader scene context in which they exist. The answer must be directly supported by the information in the video, necessitating comprehension of object related information.
+
+Key Components Included:
+Identification: Determining the presence or absence of specific objects.
+Localization: Pinpointing the spatial position of objects within frames.
+Tracking: Following the movement and trajectory of objects across frames.
+Counting: Enumerating instances of particular objects.
+Classification: Categorizing objects into predefined classes or types.
+Attributes: Describing specific characteristics such as color, size, shape, etc.
+Interaction: Exploring how objects interact with each other or the environment.
+Temporal Sequence: Understanding the order and timing of events involving objects.
+Action Recognition: Identifying actions or activities performed by objects or subjects.
+Scene Understanding: Comprehending the broader context and environment surrounding objects.
+
+Example object analysis questions:
+Is there a red bicycle in the first 10 seconds of the video?
+Where is the laptop positioned in the conference room scene?
+Track the person's movement in the hallway from the beginning to the end of the video.
+How many cars pass by the intersection in the video?
+What types of vehicles are shown in the traffic footage?
+Describe the size of the tables in the dining hall.
+How does the driver interact with the dashboard controls?
+Describe the sequence of actions the athlete takes during the race.
+Identify the gestures used by the presenter during the lecture.
+Describe the setting of the office meeting.
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

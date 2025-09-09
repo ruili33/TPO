@@ -1,17 +1,396 @@
-from PIL import Image
-from io import BytesIO
-import base64
-import math
-import ast
+"""
+LongVA Multimodal Utilities
+
+This module provides utilities for processing images and videos in the LongVA model,
+including tokenization, image processing, video frame extraction, and various
+image transformation operations.
+
+"""
+
+from typing import List, Optional, Union, Tuple, Any
+import os
+import io
 import re
+import ast
+import math
+import base64
+import tempfile
+from io import BytesIO
+
+# Third-party imports
 import torch
+import numpy as np
+import av
+import ffmpeg
+from PIL import Image
 from transformers import StoppingCriteria
+
+# Local imports
 from longva.constants import IMAGE_TOKEN_INDEX
+def tokenizer_image_token(prompt, tokenizer, image_token_index=IMAGE_TOKEN_INDEX, return_tensors=None):
+    prompt_chunks = [tokenizer(chunk).input_ids for chunk in prompt.split("<image>")]
+
+    def insert_separator(X, sep):
+        return [ele for sublist in zip(X, [sep] * len(X)) for ele in sublist][:-1]
+
+    input_ids = []
+    offset = 0
+    if len(prompt_chunks) > 0 and len(prompt_chunks[0]) > 0 and prompt_chunks[0][0] == tokenizer.bos_token_id:
+        offset = 1
+        input_ids.append(prompt_chunks[0][0])
+
+    for x in insert_separator(prompt_chunks, [image_token_index] * (offset + 1)):
+        input_ids.extend(x[offset:])
+
+    if return_tensors is not None:
+        if return_tensors == "pt":
+            return torch.tensor(input_ids, dtype=torch.long)
+        raise ValueError(f"Unsupported tensor type: {return_tensors}")
+    return input_ids
 
 
-def resize_and_center_crop(image, shortest_edge_length):
-    # Calculate new dimensions and resize
+def is_gemma_tokenizer(tokenizer: Any) -> bool:
+    """
+    Check if the tokenizer is a Gemma tokenizer.
+    
+    Args:
+        tokenizer: Tokenizer instance to check
+        
+    Returns:
+        True if tokenizer is Gemma-based, False otherwise
+    """
+    return "gemma" in tokenizer.__class__.__name__.lower()
+
+
+
+
+def uniform_sample(lst: List[Any], sample_size: int = 16) -> List[Any]:
+    """
+    Uniformly sample elements from a list.
+    
+    Args:
+        lst: Input list to sample from
+        sample_size: Number of elements to sample
+        
+    Returns:
+        List of uniformly sampled elements
+    """
+    if len(lst) < sample_size:
+        return lst
+
+    indices = np.linspace(0, len(lst) - 1, sample_size, dtype=int)
+    return [lst[i] for i in indices]
+
+
+
+def find_jpeg_in_stream(stream: io.BytesIO) -> bytes:
+    """
+    Find and extract JPEG images from a byte stream.
+    
+    Args:
+        stream: Byte stream to search for JPEG images
+        
+    Yields:
+        JPEG image data as bytes
+    """
+    start = b'\xff\xd8'
+    end = b'\xff\xd9'
+    
+    while True:
+        current_stream_content = stream.read()
+        start_idx = current_stream_content.find(start)
+        if start_idx == -1:
+            break
+            
+        stream.seek(start_idx, io.SEEK_CUR)
+        current_stream_content = current_stream_content[start_idx:]
+        end_idx = current_stream_content.find(end)
+        if end_idx == -1:
+            break
+            
+        jpeg_image = current_stream_content[:end_idx + 2]
+        stream.seek(end_idx + 2 - len(current_stream_content), io.SEEK_CUR)
+        yield jpeg_image
+
+
+def extract_frames(
+    video_path: str, 
+    num_frames: int, 
+    start_time: float, 
+    end_time: float, 
+    start2: Optional[float] = None, 
+    end2: Optional[float] = None
+) -> List[Image.Image]:
+    """
+    Extract frames from specific time ranges in a video.
+    
+    Args:
+        video_path: Path to the video file
+        num_frames: Total number of frames to extract
+        start_time: Start time of first segment (0-1 relative)
+        end_time: End time of first segment (0-1 relative)
+        start2: Start time of second segment (0-1 relative), optional
+        end2: End time of second segment (0-1 relative), optional
+        
+    Returns:
+        List of PIL Image objects
+        
+    Raises:
+        Exception: If video processing fails
+    """
+    try:
+        probe = ffmpeg.probe(video_path)
+        duration = float(probe['format']['duration'])
+        
+        # Calculate actual time ranges
+        actual_start_time1 = duration * start_time
+        actual_end_time1 = duration * end_time
+        duration1 = actual_end_time1 - actual_start_time1
+        
+        if start2 is not None and end2 is not None:
+            actual_start_time2 = duration * start2
+            actual_end_time2 = duration * end2
+            duration2 = actual_end_time2 - actual_start_time2
+            
+            # Distribute frames proportionally
+            frames1 = int(num_frames * (duration1 / (duration1 + duration2)))
+            frames2 = num_frames - frames1
+        else:
+            frames1 = num_frames
+        
+        # Extract first segment
+        out1, _ = (
+            ffmpeg
+            .input(video_path, ss=actual_start_time1, t=duration1)
+            .filter('fps', fps=frames1 / duration1)
+            .output('pipe:', format='image2pipe', vframes=frames1, vcodec='mjpeg')
+            .run(capture_stdout=True, capture_stderr=True)
+        )
+        
+        byte_stream1 = io.BytesIO(out1)
+        byte_stream1.seek(0)
+        jpeg_images1 = list(find_jpeg_in_stream(byte_stream1))
+        
+        if start2 is not None and end2 is not None:
+            # Extract second segment
+            out2, _ = (
+                ffmpeg
+                .input(video_path, ss=actual_start_time2, t=duration2)
+                .filter('fps', fps=frames2 / duration2)
+                .output('pipe:', format='image2pipe', vframes=frames2, vcodec='mjpeg')
+                .run(capture_stdout=True, capture_stderr=True)
+            )
+            
+            byte_stream2 = io.BytesIO(out2)
+            byte_stream2.seek(0)
+            jpeg_images2 = list(find_jpeg_in_stream(byte_stream2))
+            
+            pil_images = [Image.open(io.BytesIO(jpeg_data)) for jpeg_data in (jpeg_images1 + jpeg_images2)]
+        else:
+            pil_images = [Image.open(io.BytesIO(jpeg_data)) for jpeg_data in jpeg_images1]
+        
+        return pil_images
+        
+    except Exception as e:
+        raise Exception(f"Failed to extract frames from video: {str(e)}")
+
+
+def read_images_from_directory(
+    directory: str, 
+    num_frames: int, 
+    index: Optional[int] = None
+) -> List[Image.Image]:
+    """
+    Read images from a directory and return as PIL Images.
+    
+    Args:
+        directory: Path to directory containing images
+        num_frames: Number of frames to return
+        index: Optional index parameter (currently unused)
+        
+    Returns:
+        List of PIL Image objects
+        
+    Raises:
+        ValueError: If no images found in directory
+        IOError: If image loading fails
+    """
+    images = []
+    potential_files = []
+    
+    # Collect all image files
+    for filename in sorted(os.listdir(directory)):
+        file_path = os.path.join(directory, filename)
+        if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff')):
+            potential_files.append(file_path)
+    
+    # Load images
+    for file_path in potential_files:
+        try:
+            with Image.open(file_path) as img:
+                img = img.convert("RGB")
+                images.append(img.copy())
+        except IOError as e:
+            print(f"Warning: Failed to load image at {file_path}: {str(e)}")
+    
+    total_images = len(images)
+    if total_images == 0:
+        raise ValueError("No images found in the directory.")
+    
+    # Adjust number of frames
+    if num_frames > total_images:
+        # Pad with blank images if needed
+        width, height = images[-1].size
+        padding_images = [Image.new("RGB", (width, height))] * (num_frames - len(images))
+        images = padding_images + images
+    elif num_frames < total_images:
+        # Uniformly sample if too many images
+        indices = np.linspace(0, total_images - 1, num=num_frames, dtype=int)
+        images = [images[i] for i in indices]
+    
+    return images
+
+
+def get_frame_from_vcap(
+    vidcap: Any, 
+    num_frames: int = 10, 
+    fps: Optional[float] = None, 
+    frame_count: Optional[int] = None
+) -> List[Image.Image]:
+    """
+    Extract frames from a video capture object.
+    
+    Args:
+        vidcap: OpenCV VideoCapture object
+        num_frames: Number of frames to extract
+        fps: Frames per second (auto-detected if None)
+        frame_count: Total frame count (auto-detected if None)
+        
+    Returns:
+        List of PIL Image objects
+        
+    Raises:
+        ValueError: If insufficient frames found
+    """
+    import cv2
+
+    if fps is None or frame_count is None:
+        fps = vidcap.get(cv2.CAP_PROP_FPS)
+        frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    if fps == 0 or frame_count == 0:
+        print("Video file not found. Returning empty images.")
+        return [Image.new("RGB", (720, 720))] * num_frames
+    
+    duration = frame_count / fps
+    frame_interval = frame_count // num_frames
+    
+    if frame_interval == 0 and frame_count <= 1:
+        print("Frame interval is zero. Returning empty images.")
+        return [Image.new("RGB", (720, 720))] * num_frames
+
+    images = []
+    count = 0
+    success = True
+    frame_indices = np.linspace(0, frame_count - 2, num_frames, dtype=int)
+    retry = 100
+    
+    while (success or retry > 0) and len(images) < num_frames:
+        if not success:
+            retry -= 1
+            
+        if frame_count >= num_frames:
+            success, frame = vidcap.read()
+            if success and count in frame_indices:
+                img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                im_pil = Image.fromarray(img)
+                images.append(im_pil)
+            count += 1
+        else:
+            success, frame = vidcap.read()
+            if success:
+                img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                im_pil = Image.fromarray(img)
+                images.append(im_pil)
+                count += 1
+            elif count >= 1:
+                # Pad with blank frames
+                width, height = images[-1].size
+                padding_count = num_frames - len(images)
+                padding_images = [Image.new("RGB", (width, height))] * padding_count
+                images = padding_images + images
+                return images
+            else: 
+                break
+    
+    if len(images) < num_frames:
+        raise ValueError("Did not find enough frames in the video.")
+    
+    return images
+
+
+def opencv_extract_frames(
+    vpath_or_bytesio: Union[str, BytesIO], 
+    frames: int = 6, 
+    fps: Optional[float] = None, 
+    frame_count: Optional[int] = None,
+    start: Optional[float] = None,
+    end: Optional[float] = None,
+    start2: Optional[float] = None,
+    end2: Optional[float] = None
+) -> List[Image.Image]:
+    """
+    Extract frames from a video using OpenCV or from image directory.
+    
+    Args:
+        vpath_or_bytesio: Video file path, directory path, or BytesIO object
+        frames: Number of frames to extract
+        fps: Video FPS (auto-detected if None)
+        frame_count: Total frame count (auto-detected if None)
+        start: Start time for first segment (0-1 relative)
+        end: End time for first segment (0-1 relative)
+        start2: Start time for second segment (0-1 relative)
+        end2: End time for second segment (0-1 relative)
+        
+    Returns:
+        List of PIL Image objects
+        
+    Raises:
+        NotImplementedError: If input type is not supported
+    """
+    import cv2
+    
+    if isinstance(vpath_or_bytesio, str):
+        if os.path.isdir(vpath_or_bytesio):
+            return read_images_from_directory(vpath_or_bytesio, frames, start)
+        else:
+            return extract_frames(vpath_or_bytesio, frames, start, end, start2, end2)
+    elif isinstance(vpath_or_bytesio, BytesIO):
+        # Handle BytesIO input (assuming mp4)
+        with tempfile.NamedTemporaryFile(delete=True, suffix=".mp4") as temp_video:
+            temp_video.write(vpath_or_bytesio.read())
+            temp_video_name = temp_video.name
+            vidcap = cv2.VideoCapture(temp_video_name)
+            return get_frame_from_vcap(vidcap, frames, fps=fps, frame_count=frame_count)
+    else:
+        raise NotImplementedError(f"Unsupported input type: {type(vpath_or_bytesio)}")
+
+
+
+
+def resize_and_center_crop(image: Image.Image, shortest_edge_length: int) -> Image.Image:
+    """
+    Resize and center crop an image to a square.
+    
+    Args:
+        image: Input PIL Image
+        shortest_edge_length: Target size for the shortest edge
+        
+    Returns:
+        Resized and cropped PIL Image
+    """
     aspect_ratio = float(image.width) / float(image.height)
+    
     if aspect_ratio > 1:
         new_width = int(shortest_edge_length * aspect_ratio)
         new_height = shortest_edge_length
@@ -28,6 +407,7 @@ def resize_and_center_crop(image, shortest_edge_length):
     cropped_image = resized_image.crop((left, top, right, bottom))
 
     return cropped_image
+
 
 
 def auto_pad_images(image, grid_params):
@@ -311,6 +691,27 @@ def expand2square(pil_img, background_color):
         return result
 
 
+def process_image(image, image_processor, model_cfg,is_video=False):
+    # print(model_cfg)
+    if not is_video:
+        image_aspect_ratio = getattr(model_cfg, "image_aspect_ratio", None)
+    else:
+        image_aspect_ratio=""
+    if image_aspect_ratio == "highres":
+        image = process_highres_image(image, image_processor, model_cfg.image_grid_pinpoints)
+    elif image_aspect_ratio == "anyres" or "anyres_max" in image_aspect_ratio:
+        image = process_anyres_image(image, image_processor, model_cfg.image_grid_pinpoints)
+    elif image_aspect_ratio == "crop_split":
+        image = process_highres_image_crop_split(image, model_cfg, image_processor)
+    elif image_aspect_ratio == "pad":
+        image = expand2square(image, tuple(int(x * 255) for x in image_processor.image_mean))
+        image = image_processor.preprocess(image, return_tensors="pt")["pixel_values"][0]
+    else:
+        image=image_processor(image, return_tensors="pt")["pixel_values"][0]
+    # if all(x.shape == new_images[0].shape for x in new_images):
+    #     new_images = torch.stack(new_images, dim=0)
+    return image
+
 def process_images(images, image_processor, model_cfg):
     image_aspect_ratio = getattr(model_cfg, "image_aspect_ratio", None)
     new_images = []
@@ -336,29 +737,6 @@ def process_images(images, image_processor, model_cfg):
     if all(x.shape == new_images[0].shape for x in new_images):
         new_images = torch.stack(new_images, dim=0)
     return new_images
-
-
-def tokenizer_image_token(prompt, tokenizer, image_token_index=IMAGE_TOKEN_INDEX, return_tensors=None):
-    prompt_chunks = [tokenizer(chunk).input_ids for chunk in prompt.split("<image>")]
-
-    def insert_separator(X, sep):
-        return [ele for sublist in zip(X, [sep] * len(X)) for ele in sublist][:-1]
-
-    input_ids = []
-    offset = 0
-    if len(prompt_chunks) > 0 and len(prompt_chunks[0]) > 0 and prompt_chunks[0][0] == tokenizer.bos_token_id:
-        offset = 1
-        input_ids.append(prompt_chunks[0][0])
-
-    for x in insert_separator(prompt_chunks, [image_token_index] * (offset + 1)):
-        input_ids.extend(x[offset:])
-
-    if return_tensors is not None:
-        if return_tensors == "pt":
-            return torch.tensor(input_ids, dtype=torch.long)
-        raise ValueError(f"Unsupported tensor type: {return_tensors}")
-    return input_ids
-
 
 def get_model_name_from_path(model_path):
     model_path = model_path.strip("/")

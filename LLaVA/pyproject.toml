@@ -34,8 +34,6 @@ train = [
     "numpy",
     "requests",
     "sentencepiece",
-    "torch==2.1.2",
-    "torchvision==0.16.2",
     "uvicorn",
     "wandb",
     "deepspeed==0.14.4",

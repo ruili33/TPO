@@ -81,7 +81,7 @@ class LlavaQwenForCausalLM(Qwen2ForCausalLM, LlavaMetaForCausalLM):
 
         if inputs_embeds is None:
             (input_ids, position_ids, attention_mask, past_key_values, inputs_embeds, labels) = self.prepare_inputs_labels_for_multimodal(input_ids, position_ids, attention_mask, past_key_values, labels, images, modalities, image_sizes)
-
+        # print("inputs_embeds",inputs_embeds)
         if dpo_forward:
             outputs = self.model(
                 input_ids=input_ids,
@@ -97,6 +97,7 @@ class LlavaQwenForCausalLM(Qwen2ForCausalLM, LlavaMetaForCausalLM):
 
             hidden_states = outputs[0]
             logits = self.lm_head(hidden_states)
+            # print("logits",logits)
             return logits, labels
 
         else:

@@ -9,21 +9,21 @@ import numpy as np
 torch.manual_seed(0)
 
 model_path = "ruili0/LongVA-TPO"
-image_path = "local_demo/assets/lmms-eval.png"
-video_path = "local_demo/assets/dc_demo.mp4"
+image_path = "../local_demo/assets/user_example_01.jpg"
+video_path = "../local_demo/assets/dc_demo.mp4"
 max_frames_num = 16 # you can change this to several thousands so long you GPU memory can handle it :)
 gen_kwargs = {"do_sample": True, "temperature": 0.5, "top_p": None, "num_beams": 1, "use_cache": True, "max_new_tokens": 1024}
 # you can also set the device map to auto to accomodate more frames
 tokenizer, model, image_processor, _ = load_pretrained_model(model_path, None, "llava_qwen", device_map="cuda:0")
-
+model.to("cuda:0").to(torch.float16)
 
 #image input
 prompt = "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n<image>\nDescribe the image in details.<|im_end|>\n<|im_start|>assistant\n"
-input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt").unsqueeze(0).to(model.device)
+input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt").unsqueeze(0).to("cuda:0")
 image = Image.open(image_path).convert("RGB")
-images_tensor = process_images([image], image_processor, model.config).to(model.device, dtype=torch.float16)
+images_tensor = process_images([image], image_processor, model.config).to("cuda:0", dtype=torch.float16)
 with torch.inference_mode():
-    output_ids = model.generate(input_ids, images=images_tensor, image_sizes=[image.size], modalities=["image"], **gen_kwargs)
+    output_ids = model.generate(input_ids, images=images_tensor, image_sizes=torch.tensor([image.size],device="cuda:0"), modalities=["image"], **gen_kwargs)
 outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
 print(outputs)
 print("-"*50)

@@ -1,4 +1,4 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.4
 Name: longva
 Version: 1.7.0.dev0
 Summary: Towards GPT-4 like large language and visual assistant.
@@ -22,9 +22,7 @@ Requires-Dist: requests; extra == "train"
 Requires-Dist: sentencepiece; extra == "train"
 Requires-Dist: uvicorn; extra == "train"
 Requires-Dist: wandb==0.16.5; extra == "train"
-Requires-Dist: deepspeed==0.14.2; extra == "train"
-Requires-Dist: torch==2.1.2; extra == "train"
-Requires-Dist: torchvision==0.16.2; extra == "train"
+Requires-Dist: deepspeed==0.12.2; extra == "train"
 Requires-Dist: peft==0.4.0; extra == "train"
 Requires-Dist: accelerate>=0.29.1; extra == "train"
 Requires-Dist: tokenizers~=0.15.2; extra == "train"

@@ -1,0 +1,16 @@
+Using the caption of a video, create a question-answer pair that focuses on information extraction, which involves identifying and retrieving meaningful information embedded within video content. This process encompasses various tasks such as object detection, action recognition, text extraction (OCR), and summarization. The goal is to transform unstructured video data into structured, usable information that can be analyzed or utilized in downstream applications. The answer must be directly supported by the information in the video.
+
+
+Example information extraction questions:
+Summarize the key events that occur in the given surveillance video footage.
+Extract all textual information displayed on storefronts in the street-view video and provide their timestamps.
+Identify license plates of vehicles captured in the traffic camera footage.
+Recognize and log any warning signs or safety notices visible in the industrial site video.
+Describe the sequence of events in the cooking tutorial video step by step.
+Identify all instances where a brand logo appears in the commercial and describe the context.
+Analyze the instructional video and extract the key learning points presented.
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

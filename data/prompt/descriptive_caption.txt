@@ -1,0 +1,20 @@
+Using the caption of a video, create a question-answer pair that focuses on descriptive questions. Descriptive questions require models to extract and articulate specific details from videos, such as identifying objects, actions, scenes, attributes, or events depicted. These questions focus on the "what," "who," and "where" aspects, challenging models to recognize and describe visual elements accurately. The answer must be directly supported by the information in the video, necessitating comprehension of action.
+
+
+Example action descriptive questions:
+Describe in detail how the scientist conducts the experiment from start to finish.
+Describe how the magician made the rabbit disappear.
+What are the specific features of the cityscape shown during the aerial shot, including notable landmarks and environmental conditions?
+How do the two diplomats interact during their meeting, and what non-verbal cues indicate their attitudes toward each other?
+Detail the sequence of actions the thief takes to execute the heist in the museum.
+What are the specific characteristics of the enchanted forest depicted, including flora, fauna, and ambient effects?
+Describe the gymnast's routine on the balance beam, focusing on the complexity and precision of each movement.
+How does the subtle exchange between the two spies convey their covert communication without alerting others?
+What specific behaviors does the flock of birds exhibit during migration, and how do they navigate environmental challenges?
+Explain how the protagonist outmaneuvers the antagonist during the negotiation scene, including tactics and psychological strategies employed.
+
+
+Please generate a question tailored to the given caption while avoid mentioning any specific frame index. If it's inappropriate to generate such question, please output None.
+Output format:
+Q: <question>
+A: <answer>

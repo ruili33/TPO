@@ -507,18 +507,18 @@ class LLaVADPOTrainer(DPOTrainer):
             # from transformers.modeling_utils import unwrap_model
             # print(type(unwrap_model(model)))
             # print(unwrap_model(model).config)
-            if self.args.lora_enable:
-                from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
+            # if self.args.lora_enable:
+            #     from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
-                checkpoint_folder = f"{PREFIX_CHECKPOINT_DIR}-{self.state.global_step}"
-                run_dir = self._get_output_dir(trial=trial)
-                output_dir = os.path.join(run_dir, checkpoint_folder)
-                from transformers.modeling_utils import unwrap_model
+            #     checkpoint_folder = f"{PREFIX_CHECKPOINT_DIR}-{self.state.global_step}"
+            #     run_dir = self._get_output_dir(trial=trial)
+            #     output_dir = os.path.join(run_dir, checkpoint_folder)
+            #     from transformers.modeling_utils import unwrap_model
 
-                unwrapped_model = unwrap_model(model)
-                self.save_my_lora_ckpt(output_dir, self.args, unwrapped_model)
-            else:
-                super(LLaVADPOTrainer, self)._save_checkpoint(model, trial, metrics)
+            #     unwrapped_model = unwrap_model(model)
+            #     self.save_my_lora_ckpt(output_dir, self.args, unwrapped_model)
+            # else:
+            super(LLaVADPOTrainer, self)._save_checkpoint(model, trial, metrics)
 
     def _save(self, output_dir: Optional[str] = None, state_dict=None):
         if getattr(self.args, "tune_mm_mlp_adapter", False):

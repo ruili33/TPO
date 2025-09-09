@@ -1,82 +1,146 @@
-# Temporal Preference Optimization (TPO) for Long-Form Video Understanding
+# 🎬 Temporal Preference Optimization (TPO) for Long-Form Video Understanding
 
 <a href='https://arxiv.org/abs/2501.13919v3'><img src='https://img.shields.io/badge/arXiv-paper-red'></a> <a href='https://ruili33.github.io/tpo_website/'><img src='https://img.shields.io/badge/project-TPO-blue'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/huggingface-datasets-green'></a> <a href='https://huggingface.co/collections/ruili0/temporal-preference-optimization-67874b451f65db189fa35e10'><img src='https://img.shields.io/badge/model-checkpoints-yellow'></a> 
 
 
-<img src="asset/cvpr_figure_TPO.png"></img>
-Our work proposes Temporal Preference Optimization (TPO), which serves as comprehensive pipeline for self-training based temporal preference optimization for cutting-edge video large multimodal models (video-LMMs). TPO enhances video comprehension in video-LMMs by modeling temporal preferences at two granular levels: localized and comprehensive TPO. In localized TPO (upper-left), we generate queries focused on short segments, with contrastive responses that retain or exclude the target segment. For comprehensive TPO (lower-left),  queries are designed broader understanding, using intact video versus sparse downsampled video for contrasting responses. After post-filtering, the contrast response pairs are serving as the  preference dataset to train a video-LMM, guiding the model to prioritize preferred responses for improved video understanding.
+</div>
+
+---
+
+## 📖 Overview
+
+**Temporal Preference Optimization (TPO)** is a self-training framework designed to enhance long-form video understanding capabilities in video Large Multimodal Models (video-LMMs). Our approach significantly improves video comprehension by modeling temporal preferences at two complementary granular levels.
+
+<div align="center">
+<img src="asset/cvpr_figure_TPO.png" width="800" alt="TPO Framework Overview">
+</div>
+
+### 🔑 Key Innovations
+
+- **🎯 Localized TPO**: Generates queries focused on short video segments with contrastive responses that retain or exclude target segments
+- **🌐 Comprehensive TPO**: Designs broader understanding queries using intact videos versus sparse downsampled videos for response contrast  
+- **🔧 Intelligent Post-filtering**: Ensures high-quality contrast response pairs through multi-dimensional filtering mechanisms
+- **🚀 Self-training Pipeline**: Complete end-to-end framework for temporal preference optimization
+
+### ✨ Key Features
+
+- 📊 **Significant Performance Gains**: Achieves substantial improvements across multiple video understanding benchmarks
+- 📚 **Comprehensive Pipeline**: Complete toolkit from data curation to model training
+- 🔬 **Reproducible Research**: Full codebase and datasets for research reproducibility
 
 
-## :rocket: Quick Start
+## 🚀 Quick Start
 
-### Model Weights
+### 📦 Pre-trained Model Weights
 
-| Model | Huggingface Link  |
-:--------------------------:| :--------------------------:|
-| LongVA-7B-TPO | [Download](https://huggingface.co/ruili0/LongVA-7B-TPO) |  
-| LLaVA-Video-7B-TPO | [Download](https://huggingface.co/ruili0/LLaVA-Video-7B-Qwen2-TPO) |
+We provide high-performance model weights trained with TPO:
+
+| Model | Base Architecture | HuggingFace Link | Description |
+|:---:|:---:|:---:|:---:|
+| LongVA-7B-TPO | LongVA-7B | [🤗 Download](https://huggingface.co/ruili0/LongVA-7B-TPO) | Optimized for long-form video understanding |
+| LLaVA-Video-7B-TPO | LLaVA-Video-7B | [🤗 Download](https://huggingface.co/ruili0/LLaVA-Video-7B-Qwen2-TPO) | General-purpose video comprehension model |
+
+### 🛠️ Installation
 
 
-### Install (Linux)
-For  LongVA-TPO:
-```
+#### Option 1: LongVA-TPO Setup
+```bash
+# Clone the repository
 git clone https://github.com/ruili33/TPO
 cd TPO
+
+# Create conda environment
 conda create -n TPOLongVA python=3.10
 conda activate TPOLongVA
+
+# Install dependencies
+conda install ffmpeg
 pip install torch==2.1.2 torchvision --index-url https://download.pytorch.org/whl/cu118
 pip install -e "longva/.[train]"
-pip install packaging &&  pip install ninja && pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
+pip install packaging ffmpeg-python ninja
+pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
 pip install -r requirements_longva.txt
 ```
 
-For LLaVA-Video-TPO:
-```
+#### Option 2: LLaVA-Video-TPO Setup
+```bash
+# Create conda environment
 conda create -n TPOllava python=3.10 -y
 conda activate TPOllava
+
+# Install dependencies
+conda install ffmpeg
 pip install --upgrade pip 
+pip install torch==2.1.2 torchvision --index-url https://download.pytorch.org/whl/cu118
 pip install -e "LLaVA/.[train]"
 pip install flash-attn==2.5.0 --no-build-isolation --no-cache-dir
+pip install ffmpeg-python
 ```
 
-### Inference
+### 🎯 Model Inference
 
 For LongVA-TPO, please following the inference demo in `longva/inference_longva.py`.
 
 For LLaVA-Video-TPO, please following the inference demo in `LLaVA/inference_llava.py`.
 
-### Evaluation
 
-For evaluation, we utilize [lmms-eval](https://github.com/EvolvingLMMs-Lab/lmms-eval) to facilitate a consistent evaluation as previous works. Please refer to their instructions for evaluation setup.
+### 📊 Model Evaluation
 
-For LongVA-TPO, please refer to `longva/eval.sh` for the evaluation script.
+We utilize the [lmms-eval](https://github.com/EvolvingLMMs-Lab/lmms-eval) framework for standardized evaluation, ensuring consistency with previous works.
 
-For LLaVA-Video-TPO, please refer to `LLaVA/eval.sh` for the evaluation script.
+#### Evaluation Scripts
+```bash
+# LongVA-TPO evaluation
+bash longva/eval.sh
 
-## Datasets
-The TPO dataset for LongVA are available at [Huggingface Dataset](https://huggingface.co/datasets/ruili0/LongVA-TPO-10k).
-
-## Web Demo
-To run the web demo for our TPO model (LLaVA-Video-7B-TPO), please run the following python script:
+# LLaVA-Video-TPO evaluation  
+bash LLaVA/eval.sh
 ```
+
+### 📦 Datasets
+
+| Dataset | Description | Link |
+|:---:|:---:|:---:|
+| LongVA-TPO-10k | TPO training dataset for LongVA | [🤗 Dataset](https://huggingface.co/datasets/ruili0/LongVA-TPO-10k) |
+
+### 🌐 Web Demo
+
+Experience our TPO model (LLaVA-Video-7B-TPO) with an interactive web interface:
+
+```bash
 conda activate TPOllava
 python local_demo/multimodal_chat.py
 ```
 
-
-## Training
-
-The training code is coming soon!
+Visit the local server URL to start interactive video question-answering.
 
 
-## TODO
-- [ ] Release the temporal preference data curation pipeline by March.
-- [ ] Release the training code by March.
+## 🔧 Training
 
-## Citation
+### TPO Training Pipeline
+
+#### LLaVA-Video-TPO Training
+```bash
+# Run TPO training script
+bash LLaVA/tpo_video.sh
+```
+
+#### LongVA-TPO Training
+```bash
+# Run TPO training script
+bash longva/longva/source/TPO.sh
+```
+
+### 📈 TPO Data Curation Pipeline
+
+Detailed implementation scripts are available in the `data/` directory.
+
+
+## 📝 Citation
 
 If you find this repository useful in your research or work, please consider citing our paper:
-```
+
+```bibtex
 @article{li2025temporal,
       title={Temporal Preference Optimization for Long-Form Video Understanding},
       author={Li, Rui and Wang, Xiaohan and Zhang, Yuhui and Zohar, Orr and Wang, Zeyu and Yeung-Levy, Serena},
@@ -85,7 +149,16 @@ If you find this repository useful in your research or work, please consider cit
 }
 ```
 
+## 🙏 Acknowledgements
 
-## Acknowledgements
+This work builds upon the excellent open-source projects [LongVA](https://github.com/EvolvingLMMs-Lab/LongVA) and [LLaVA-Video](https://github.com/LLaVA-VL/LLaVA-NeXT). We extend our sincere gratitude to the maintainers and contributors of these repositories for their outstanding work, which greatly facilitated the development of our project.
 
-This work is based on the original [LongVA](https://github.com/EvolvingLMMs-Lab/LongVA) and [LLaVA-Video](https://github.com/LLaVA-VL/LLaVA-NeXT) repository. We extend our gratitude to the maintainers and contributors of these repositories for their incredible work, which greatly facilitated the development of our project.
+
+---
+
+<div align="center">
+
+**⭐ If you find this project helpful, please give us a star!**
+
+
+</div>
